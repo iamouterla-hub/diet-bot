@@ -36,6 +36,6 @@ async def on_message(message):
     if any(k in message.content for k in exercise_keywords):
         async with message.channel.typing():
             reply = await ask_axel(message.content)
-            await message.channel.send(f"💪 **艾索**：{reply}")
+            await message.channel.send(reply)
 
 bot.run(DISCORD_TOKEN)
