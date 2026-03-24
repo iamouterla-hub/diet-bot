@@ -68,13 +68,18 @@ async def on_message(message):
     if message.author.bot:
         return
     
-    if message.channel.id == WEEKLY_CHANNEL_ID and message.attachments:
-        for attachment in message.attachments:
-            if any(attachment.filename.lower().endswith(ext) for ext in [".png", ".jpg", ".jpeg"]):
-                await asyncio.sleep(10)
-                meeting_channel = bot.get_channel(MEETING_CHANNEL_ID)
-                if meeting_channel:
-                    await run_meeting(meeting_channel, "請根據本週 Fitdays 數據進行討論")
+if message.channel.id == WEEKLY_CHANNEL_ID and message.attachments:
+    for attachment in message.attachments:
+        if any(attachment.filename.lower().endswith(ext) for ext in [".png", ".jpg", ".jpeg"]):
+            await asyncio.sleep(30)
+            weekly_data = ""
+            async for msg in message.channel.history(limit=5):
+                if msg.author.bot and msg.content:
+                    weekly_data = msg.content
+                    break
+            meeting_channel = bot.get_channel(MEETING_CHANNEL_ID)
+            if meeting_channel and weekly_data:
+                await run_meeting(meeting_channel, weekly_data)
 
     if message.content == "開會" and message.channel.id == MEETING_CHANNEL_ID:
         await run_meeting(message.channel, "請根據本週身體狀況進行討論")
