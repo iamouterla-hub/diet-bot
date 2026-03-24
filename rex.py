@@ -39,27 +39,41 @@ async def ask_ai(prompt, topic, history):
     )
     return response.content[0].text
 
+async def get_weekly_data():
+    weekly_channel = rex_bot.get_channel(WEEKLY_CHANNEL_ID)
+    if weekly_channel:
+        async for msg in weekly_channel.history(limit=10):
+            if msg.author.bot and msg.content:
+                return msg.content
+    return ""
+
 async def run_meeting(meeting_channel, weekly_data):
     history = []
-    await rex_bot.get_channel(MEETING_CHANNEL_ID).send("📊 **本週健康檢討會議開始**\n─────────────────")
+    await meeting_channel.send("📊 **本週健康檢討會議開始**\n─────────────────")
     await asyncio.sleep(1)
 
     cole_reply = await ask_ai(COLE_MEETING_PROMPT, weekly_data, history)
-    await cole_bot.get_channel(MEETING_CHANNEL_ID).send(cole_reply)
+    cole_channel = cole_bot.get_channel(MEETING_CHANNEL_ID)
+    if cole_channel:
+        await cole_channel.send(cole_reply)
     history.append({"role": "assistant", "content": f"柯爾：{cole_reply}"})
     await asyncio.sleep(2)
 
     nora_reply = await ask_ai(NORA_MEETING_PROMPT, weekly_data, history)
-    await nora_bot.get_channel(MEETING_CHANNEL_ID).send(nora_reply)
+    nora_channel = nora_bot.get_channel(MEETING_CHANNEL_ID)
+    if nora_channel:
+        await nora_channel.send(nora_reply)
     history.append({"role": "user", "content": f"諾拉：{nora_reply}"})
     await asyncio.sleep(2)
 
     axel_reply = await ask_ai(AXEL_MEETING_PROMPT, weekly_data, history)
-    await axel_bot.get_channel(MEETING_CHANNEL_ID).send(axel_reply)
+    axel_channel = axel_bot.get_channel(MEETING_CHANNEL_ID)
+    if axel_channel:
+        await axel_channel.send(axel_reply)
     history.append({"role": "user", "content": f"艾索：{axel_reply}"})
     await asyncio.sleep(2)
 
-    await rex_bot.get_channel(MEETING_CHANNEL_ID).send("─────────────────\n✅ **會議結束，下週加油！**")
+    await meeting_channel.send("─────────────────\n✅ **會議結束，下週加油！**")
 
 @rex_bot.event
 async def on_ready():
@@ -74,26 +88,18 @@ async def on_message(message):
         for attachment in message.attachments:
             if any(attachment.filename.lower().endswith(ext) for ext in [".png", ".jpg", ".jpeg"]):
                 await asyncio.sleep(60)
-                weekly_data = ""
-                async for msg in message.channel.history(limit=5):
-                    if msg.author.bot and msg.content:
-                        weekly_data = msg.content
-                        break
+                weekly_data = await get_weekly_data()
                 if weekly_data:
-                    await run_meeting(rex_bot.get_channel(MEETING_CHANNEL_ID), weekly_data)
+                    meeting_channel = rex_bot.get_channel(MEETING_CHANNEL_ID)
+                    if meeting_channel:
+                        await run_meeting(meeting_channel, weekly_data)
 
     if message.content == "開會" and message.channel.id == MEETING_CHANNEL_ID:
-    weekly_data = ""
-    weekly_channel = rex_bot.get_channel(WEEKLY_CHANNEL_ID)
-    if weekly_channel:
-        async for msg in weekly_channel.history(limit=10):
-            if msg.author.bot and msg.content:
-                weekly_data = msg.content
-                break
-    if weekly_data:
-        await run_meeting(message.channel, weekly_data)
-    else:
-        await message.channel.send("找不到本週數據，請先在每週數據頻道貼 Fitdays 截圖！")
+        weekly_data = await get_weekly_data()
+        if weekly_data:
+            await run_meeting(message.channel, weekly_data)
+        else:
+            await message.channel.send("找不到本週數據，請先在每週數據頻道貼 Fitdays 截圖！")
 
 async def main():
     await asyncio.gather(
