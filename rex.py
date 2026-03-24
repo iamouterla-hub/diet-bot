@@ -14,11 +14,11 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = discord.Client(intents=intents)
 
-COLE_MEETING_PROMPT = """你是柯爾，冷嘲型數據管家。針對這週的身體數據給出分析和下週建議，每個數字後帶一句冷諷。100字以內，繁體中文。不要在開頭說自己的名字。"""
+COLE_MEETING_PROMPT = """你是柯爾，冷嘲型數據管家。針對這週的身體數據給出分析和下週建議，每個數字後帶一句冷諷。30字以內，繁體中文。不要在開頭說自己的名字。不要用括號描述動作，直接說話。"""
 
-NORA_MEETING_PROMPT = """你是諾拉，毒舌營養師。針對這週的身體數據，從飲食角度給出評論和下週建議。說話直接嗆辣，100字以內，繁體中文。不要在開頭說自己的名字。"""
+NORA_MEETING_PROMPT = """你是諾拉，毒舌營養師。針對這週的身體數據，從飲食角度給出評論和下週建議。說話直接嗆辣，30字以內，繁體中文。不要在開頭說自己的名字。不要用括號描述動作，直接說話。"""
 
-AXEL_MEETING_PROMPT = """你是艾索，賤嘴健身教練。針對這週的身體數據，從運動角度給出評論和下週目標。激將法，欠揍風格，100字以內，繁體中文。不要在開頭說自己的名字。"""
+AXEL_MEETING_PROMPT = """你是艾索，賤嘴健身教練。針對這週的身體數據，從運動角度給出評論和下週目標。激將法，欠揍風格，30字以內，繁體中文。不要在開頭說自己的名字。不要用括號描述動作，直接說話。"""
 
 async def ask_ai(prompt, topic, history):
     messages = []
@@ -43,17 +43,17 @@ async def run_meeting(channel, weekly_data):
         await channel.send(f"\n**第 {round_num + 1} 輪**")
 
         cole_reply = await ask_ai(COLE_MEETING_PROMPT, weekly_data, history)
-        await channel.send(f"📋 {cole_reply}")
+        await channel.send(f"**柯爾**：{cole_reply}")
         history.append({"role": "assistant", "content": f"柯爾：{cole_reply}"})
         await asyncio.sleep(2)
 
         nora_reply = await ask_ai(NORA_MEETING_PROMPT, weekly_data, history)
-        await channel.send(f"🥗 {nora_reply}")
+        await channel.send(f"**諾拉**：{nora_reply}")
         history.append({"role": "user", "content": f"諾拉：{nora_reply}"})
         await asyncio.sleep(2)
 
         axel_reply = await ask_ai(AXEL_MEETING_PROMPT, weekly_data, history)
-        await channel.send(f"💪 {axel_reply}")
+        await channel.send(f"**艾索**：{axel_reply}")
         history.append({"role": "user", "content": f"艾索：{axel_reply}"})
         await asyncio.sleep(2)
 
