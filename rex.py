@@ -39,7 +39,7 @@ async def run_meeting(channel, weekly_data):
     await channel.send("📊 **本週健康檢討會議開始**\n─────────────────")
     await asyncio.sleep(1)
 
-    for round_num in range(3):
+    for round_num in range(1):
         await channel.send(f"\n**第 {round_num + 1} 輪**")
 
         cole_reply = await ask_ai(COLE_MEETING_PROMPT, weekly_data, history)
