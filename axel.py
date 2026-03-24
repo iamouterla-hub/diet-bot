@@ -12,7 +12,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = discord.Client(intents=intents)
 
-AXEL_PROMPT = """你是艾索，一個賤嘴的健身教練。用戶回報運動狀況，你要確認並回應。做到了就用很欠揍的方式稱讚，沒做到就激他。說話簡短，繁體中文，台灣口語。絕對不要回應其他 bot 的訊息。"""
+AXEL_PROMPT = """你是艾索，一個賤嘴的健身教練。用戶回報運動狀況，你要確認並回應。做到了就用很欠揍的方式稱讚，沒做到就激他。說話簡短，繁體中文，台灣口語。絕對不要回應其他 bot 的訊息。絕對不要在回覆開頭加上自己的名字。""""""
 
 async def ask_axel(text):
     response = client_anthropic.messages.create(
