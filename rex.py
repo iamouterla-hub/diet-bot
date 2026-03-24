@@ -64,7 +64,7 @@ async def on_message(message):
     if message.channel.id == WEEKLY_CHANNEL_ID and message.attachments:
         for attachment in message.attachments:
             if any(attachment.filename.lower().endswith(ext) for ext in [".png", ".jpg", ".jpeg"]):
-                await asyncio.sleep(60)
+                await asyncio.sleep(20)
                 weekly_data = ""
                 async for msg in message.channel.history(limit=5):
                     if msg.author.bot and msg.content:
