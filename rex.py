@@ -25,7 +25,6 @@ async def ask_ai(prompt, topic, history):
     for h in history[-3:]:
         messages.append({"role": h["role"], "content": h["content"]})
     messages.append({"role": "user", "content": f"{prompt}\n\n本週數據摘要：{topic}"})
-    
     response = client_anthropic.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=300,
@@ -35,28 +34,22 @@ async def ask_ai(prompt, topic, history):
 
 async def run_meeting(channel, weekly_data):
     history = []
-    
     await channel.send("📊 **本週健康檢討會議開始**\n─────────────────")
     await asyncio.sleep(1)
-
     for round_num in range(1):
         await channel.send(f"\n**第 {round_num + 1} 輪**")
-
         cole_reply = await ask_ai(COLE_MEETING_PROMPT, weekly_data, history)
         await channel.send(f"**柯爾**：{cole_reply}")
         history.append({"role": "assistant", "content": f"柯爾：{cole_reply}"})
         await asyncio.sleep(2)
-
         nora_reply = await ask_ai(NORA_MEETING_PROMPT, weekly_data, history)
         await channel.send(f"**諾拉**：{nora_reply}")
         history.append({"role": "user", "content": f"諾拉：{nora_reply}"})
         await asyncio.sleep(2)
-
         axel_reply = await ask_ai(AXEL_MEETING_PROMPT, weekly_data, history)
         await channel.send(f"**艾索**：{axel_reply}")
         history.append({"role": "user", "content": f"艾索：{axel_reply}"})
         await asyncio.sleep(2)
-
     await channel.send("─────────────────\n✅ **會議結束，下週加油！**")
 
 @bot.event
@@ -67,19 +60,19 @@ async def on_ready():
 async def on_message(message):
     if message.author.bot:
         return
-    
-if message.channel.id == WEEKLY_CHANNEL_ID and message.attachments:
-    for attachment in message.attachments:
-        if any(attachment.filename.lower().endswith(ext) for ext in [".png", ".jpg", ".jpeg"]):
-            await asyncio.sleep(60)
-            weekly_data = ""
-            async for msg in message.channel.history(limit=5):
-                if msg.author.bot and msg.content:
-                    weekly_data = msg.content
-                    break
-            meeting_channel = bot.get_channel(MEETING_CHANNEL_ID)
-            if meeting_channel and weekly_data:
-                await run_meeting(meeting_channel, weekly_data)
+
+    if message.channel.id == WEEKLY_CHANNEL_ID and message.attachments:
+        for attachment in message.attachments:
+            if any(attachment.filename.lower().endswith(ext) for ext in [".png", ".jpg", ".jpeg"]):
+                await asyncio.sleep(60)
+                weekly_data = ""
+                async for msg in message.channel.history(limit=5):
+                    if msg.author.bot and msg.content:
+                        weekly_data = msg.content
+                        break
+                meeting_channel = bot.get_channel(MEETING_CHANNEL_ID)
+                if meeting_channel and weekly_data:
+                    await run_meeting(meeting_channel, weekly_data)
 
     if message.content == "開會" and message.channel.id == MEETING_CHANNEL_ID:
         await run_meeting(message.channel, "請根據本週身體狀況進行討論")
