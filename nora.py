@@ -45,7 +45,7 @@ async def on_message(message):
     if any(k in message.content for k in meal_keywords):
         async with message.channel.typing():
             reply = await ask_nora(message.content)
-            await message.channel.send(f"🥗 **諾拉**：{reply}")
+            await message.channel.send(reply)
 
 bot.run(DISCORD_TOKEN)
 
