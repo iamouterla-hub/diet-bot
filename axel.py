@@ -1,6 +1,8 @@
 import discord
 import anthropic
 import os
+from collections import defaultdict
+from datetime import datetime, timedelta
 
 DISCORD_TOKEN = os.environ.get("AXEL_TOKEN")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
@@ -12,15 +14,31 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = discord.Client(intents=intents)
 
+conversation_history = defaultdict(list)
+last_message_time = defaultdict(datetime.now)
+
 AXEL_PROMPT = """你是艾索，一個賤嘴的健身教練。用戶回報運動狀況，你要確認並回應。做到了就用很欠揍的方式稱讚，沒做到就激他。說話簡短，繁體中文，台灣口語。絕對不要回應其他 bot 的訊息。絕對不要在回覆開頭加上自己的名字。"""
 
-async def ask_axel(text):
+async def ask_axel(user_id, text):
+    key = str(user_id)
+    if datetime.now() - last_message_time[key] > timedelta(minutes=30):
+        conversation_history[key] = []
+    last_message_time[key] = datetime.now()
+    
+    conversation_history[key].append({"role": "user", "content": text})
+    if len(conversation_history[key]) > 10:
+        conversation_history[key] = conversation_history[key][-10:]
+    
+    messages = [{"role": "user", "content": AXEL_PROMPT}] + conversation_history[key]
+    
     response = client_anthropic.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=300,
-        messages=[{"role": "user", "content": f"{AXEL_PROMPT}\n\n用戶說：{text}"}]
+        messages=messages
     )
-    return response.content[0].text
+    reply = response.content[0].text
+    conversation_history[key].append({"role": "assistant", "content": reply})
+    return reply
 
 @bot.event
 async def on_ready():
@@ -32,10 +50,8 @@ async def on_message(message):
         return
     if message.channel.id != CHECKIN_CHANNEL_ID:
         return
-    exercise_keywords = ["運動", "走路", "跑步", "健身", "步", "游泳", "騎車", "沒運動", "沒有運動"]
-    if any(k in message.content for k in exercise_keywords):
-        async with message.channel.typing():
-            reply = await ask_axel(message.content)
-            await message.channel.send(reply)
+    async with message.channel.typing():
+        reply = await ask_axel(message.author.id, message.content)
+        await message.channel.send(reply)
 
 bot.run(DISCORD_TOKEN)
