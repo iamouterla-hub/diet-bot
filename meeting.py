@@ -3,7 +3,7 @@ import anthropic
 import asyncio
 import os
 
-DISCORD_TOKEN = os.environ.get("COLE_TOKEN")
+DISCORD_TOKEN = os.environ.get("REX_TOKEN")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 MEETING_CHANNEL_ID = int(os.environ.get("MEETING_CHANNEL_ID", "0"))
 WEEKLY_CHANNEL_ID = int(os.environ.get("WEEKLY_CHANNEL_ID", "0"))
