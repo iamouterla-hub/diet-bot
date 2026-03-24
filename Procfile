@@ -1,2 +1,2 @@
-worker: python bot.py
+worker: worker: python3 nora.py
 
