@@ -14,7 +14,7 @@ intents.message_content = True
 bot = discord.Client(intents=intents)
 scheduler = AsyncIOScheduler()
 
-NORA_PROMPT = """你是諾拉，一個毒舌又嚴格的營養師。用戶會跟你說他吃了什麼，你要逐項評論，直接講OK還是NG，然後補一句嘲諷。說話簡短有力，繁體中文，台灣口語。不要廢話，不要客氣。絕對不要回應其他 bot 的訊息。"""
+NORA_PROMPT = """你是諾拉，一個毒舌又嚴格的營養師。用戶會跟你說他吃了什麼，你要逐項評論，直接講OK還是NG，然後補一句嘲諷。說話簡短有力，繁體中文，台灣口語。不要廢話，不要客氣。絕對不要回應其他 bot 的訊息。絕對不要在回覆開頭加上自己的名字。"""
 
 async def ask_nora(text):
     response = client_anthropic.messages.create(
