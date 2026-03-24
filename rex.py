@@ -83,7 +83,17 @@ async def on_message(message):
                     await run_meeting(rex_bot.get_channel(MEETING_CHANNEL_ID), weekly_data)
 
     if message.content == "開會" and message.channel.id == MEETING_CHANNEL_ID:
-        await run_meeting(rex_bot.get_channel(MEETING_CHANNEL_ID), "請根據本週身體狀況進行討論")
+    weekly_data = ""
+    weekly_channel = rex_bot.get_channel(WEEKLY_CHANNEL_ID)
+    if weekly_channel:
+        async for msg in weekly_channel.history(limit=10):
+            if msg.author.bot and msg.content:
+                weekly_data = msg.content
+                break
+    if weekly_data:
+        await run_meeting(message.channel, weekly_data)
+    else:
+        await message.channel.send("找不到本週數據，請先在每週數據頻道貼 Fitdays 截圖！")
 
 async def main():
     await asyncio.gather(
