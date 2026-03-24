@@ -60,6 +60,6 @@ async def on_message(message):
                     media_type = "image/png" if attachment.filename.lower().endswith(".png") else "image/jpeg"
                     last_week = await get_last_week_data(message.channel)
                     reply = await ask_cole_image(image_data, media_type, last_week)
-                    await message.channel.send(f"📋 **柯爾**：\n{reply}")
+                    await message.channel.send(reply)
 
 bot.run(DISCORD_TOKEN)
